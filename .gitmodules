@@ -1,0 +1,6 @@
+[submodule "vendor/TradingAgents"]
+	path = vendor/TradingAgents
+	url = https://github.com/TauricResearch/TradingAgents.git
+[submodule "vendor/QuantDinger"]
+	path = vendor/QuantDinger
+	url = https://github.com/OpenByteInc/QuantDinger.git

@@ -1,0 +1,27 @@
+# Scheduler + dashboard for the paper account. QuantDinger is NOT started here: run it with
+# scripts/quantdinger_local.sh (host) or QuantDinger's own compose with
+# LIVE_TRADING_ENABLED=false, then point QUANTDINGER_BASE_URL at it.
+services:
+  aipt:
+    build: .
+    container_name: aipt-scheduler
+    command: ["aipt", "scheduler"]
+    env_file: .env
+    environment:
+      QUANTDINGER_BASE_URL: ${QUANTDINGER_BASE_URL_DOCKER:-http://host.docker.internal:5055}
+    volumes:
+      - ./data:/app/data
+      - ./reports:/app/reports
+      - ./config:/app/config:ro
+    restart: unless-stopped
+    stop_grace_period: 10m    # let an in-flight cycle finish; SIGTERM stops after the current step
+
+  dashboard:
+    build: .
+    container_name: aipt-dashboard
+    command: ["python", "-m", "http.server", "8765", "--bind", "0.0.0.0", "--directory", "/app/reports"]
+    volumes:
+      - ./reports:/app/reports:ro
+    ports:
+      - "127.0.0.1:8765:8765"
+    restart: unless-stopped

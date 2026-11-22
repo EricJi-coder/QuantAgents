@@ -1,0 +1,108 @@
+# AI Multi-Agent Research Portfolio — PAPER ONLY.
+# Every value here can be overridden by a second YAML passed with --config, and
+# secrets come only from the environment (see .env.example). Nothing in this file
+# can enable real-money trading: `mode` accepts the single value "paper".
+
+mode: paper
+
+account:
+  id: ai-multi-agent-research
+  name: AI Multi-Agent Research Portfolio
+  initial_capital: 100000.00
+  base_currency: USD
+  universe: us_equities_and_etfs
+
+paths:
+  data_dir: data            # ledger.db, venue.db, logs, TradingAgents caches
+  reports_dir: reports      # dashboard, run reports, SavvyTrader publication files
+
+risk:
+  max_position_weight: 0.10         # of total equity, per security
+  max_gross_exposure: 1.00          # long-only gross exposure cap
+  min_cash_reserve: 0.05            # of total equity, after every buy
+  max_daily_buy_turnover: 0.20      # new purchases per session, of equity at session start
+  drawdown_halt: 0.10               # from running equity peak; halts risk-increasing orders
+  min_order_notional: 100.00
+  max_orders_per_ticker_per_session: 1
+  max_quote_age_seconds: 1200       # quotes older than 20 minutes are stale
+  session_open_buffer_minutes: 5    # no orders in the first N minutes of the regular session
+  session_close_buffer_minutes: 5   # ...or the last N minutes
+  allow_fractional_shares: false
+  # Leveraged / inverse products embed leverage or short exposure, which the policy forbids.
+  denied_tickers: [TQQQ, SQQQ, SPXL, SPXS, SPXU, UPRO, SDS, SSO, QLD, QID, TNA, TZA, SOXL, SOXS,
+                   LABU, LABD, UVXY, SVXY, VXX, VIXY, TECL, TECS, FAS, FAZ, NUGT, DUST, JNUG, JDST,
+                   TSLL, TSLQ, NVDL, NVDQ, SH, PSQ, DOG, RWM, SPDN]
+  denied_name_patterns: ["2x", "3x", "-1x", "-2x", "-3x", "ultra", "inverse", "leveraged", "short ", "bear "]
+
+allocation:
+  # The Portfolio Manager's 5-tier rating fixes the direction; the formalizer's proposed
+  # weight sizes it within that direction. Out-of-range proposals are NOT clipped to the
+  # risk limits here — the risk engine rejects them, so a violation is visible.
+  min_confidence_for_buy: 0.55
+  default_buy_weight: 0.05
+  underweight_fraction: 0.5         # Underweight with no usable proposal halves the position
+
+execution:
+  venue: quantdinger                # quantdinger (Agent Gateway, paper token) | local (offline emulation)
+  quantdinger_market: USStock
+  order_type: market
+  # Cost model (see docs/ARCHITECTURE.md §Execution assumptions)
+  half_spread_bps: 3.0
+  impact_bps_per_pct_adv: 5.0
+  max_slippage_bps: 50.0
+  max_participation_of_adv: 0.01    # an order above 1% of 20-day ADV is partially filled
+  commission_per_share: 0.0
+  commission_min: 0.0
+  sec_fee_per_million: 27.80        # Section 31 fee on sale proceeds; verify the current SEC rate
+  finra_taf_per_share: 0.000166     # FINRA TAF on shares sold
+  finra_taf_max: 8.30
+  execution_latency_seconds: 2
+  max_reference_price_deviation: 0.02  # venue reference vs our quote; larger is rejected
+
+research:
+  watchlist: [SPY, QQQ, AAPL, MSFT, NVDA, AMZN, GOOGL, JPM, XLV, XLE]
+  max_tickers_per_cycle: 4          # cost control; holdings are always reviewed first
+  analysts: [market, social, news, fundamentals]
+  max_debate_rounds: 1
+  max_risk_discuss_rounds: 1
+  checkpoint_enabled: true
+  daily_llm_budget_usd: 25.0        # research stops for the day once priced spend reaches this
+  output_language: English
+
+llm:
+  # TradingAgents' two tiers: quick serves analysts, researchers, debaters and the trader;
+  # deep serves the Research Manager and Portfolio Manager. The formalizer converts the
+  # finished debate into the machine-readable decision.
+  provider: anthropic
+  quick_model: claude-sonnet-5
+  deep_model: claude-opus-5-5
+  quick_provider: null
+  deep_provider: null
+  formalizer_provider: null         # null = deep tier's provider
+  formalizer_model: null            # null = deep_model
+  temperature: null
+  max_retries: 3
+  knowledge_cutoff: null            # e.g. "2026-01-31"; backtests before it are flagged as contaminated-risk
+  # USD per 1M tokens. Left empty on purpose: fill in from your provider's current price list.
+  # Unpriced calls are counted in tokens and reported as "unpriced", never guessed.
+  prices: {}
+  #  claude-sonnet-5: {input: 0.0, output: 0.0}
+
+schedule:
+  timezone: America/New_York
+  decision_times: ["10:30"]         # ET, regular-session trading days only
+  mark_to_market_time: "16:10"
+  poll_seconds: 30
+
+benchmark:
+  ticker: SPY
+  risk_free_rate: 0.0               # annual, for Sharpe
+
+publishing:
+  savvytrader:
+    enabled: true
+    portfolio_name: AI Multi-Agent Research Portfolio (SIMULATED)
+    disclaimer: >-
+      SIMULATED, AI-MANAGED PAPER PORTFOLIO. No real money is invested. Trades are decided by an
+      autonomous multi-agent LLM system and filled in a local paper-trading simulator; prices shown
+      on SavvyTrader are SavvyTrader's own virtual executions. Not investment advice.

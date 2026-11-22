@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+*.egg-info/
+.env
+.env.*
+!.env.example
+var/
+data/
+reports/
+vendor/QuantDinger/backend_api_python/.venv-qd/

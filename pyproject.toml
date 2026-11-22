@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aipt"
+version = "0.1.0"
+description = "Autonomous multi-agent AI paper-trading system: TradingAgents research + QuantDinger paper execution"
+requires-python = ">=3.11"
+dependencies = [
+    "tradingagents",           # installed editable from vendor/TradingAgents
+    "pydantic>=2.7",
+    "pyyaml>=6.0",
+    "requests>=2.32",
+    "pandas>=2.2",
+    "yfinance>=0.2.50",
+    "exchange-calendars>=4.5",
+    "typer>=0.12",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[project.scripts]
+aipt = "aipt.cli:app"
+
+[tool.setuptools.packages.find]
+include = ["aipt*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra -m \"not network and not quantdinger\""
+markers = [
+    "network: needs internet market data (run with -m network)",
+    "quantdinger: needs a running local QuantDinger API (run with -m quantdinger)",
+]
+filterwarnings = ["ignore::DeprecationWarning"]

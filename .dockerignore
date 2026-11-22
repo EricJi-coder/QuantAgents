@@ -1,0 +1,9 @@
+.venv
+.env
+.env.*
+data
+reports
+var
+**/__pycache__
+**/.pytest_cache
+vendor/QuantDinger/backend_api_python/.venv-qd
