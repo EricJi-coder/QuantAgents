@@ -1,4 +1,6 @@
-# aipt: AI multi-agent trading system
+# QuantAgents
+
+AI multi-agent trading system. The Python package and CLI are named `aipt`.
 
 An autonomous research and execution system for US equities and ETFs:
 [TradingAgents](https://github.com/TauricResearch/TradingAgents) runs the multi-agent LLM
